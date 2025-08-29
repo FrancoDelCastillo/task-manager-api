@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+      /* Core */
+      "target": "ES2020",                
+      "module": "commonjs",              
+      "rootDir": "src",
+      "outDir": "dist",
+  
+      /* Modules */
+      "esModuleInterop": true,           // clean `import express from "express"`
+      "resolveJsonModule": true,         // allow importing .json files
+      "moduleResolution": "node",        // Node-style resolution
+      "isolatedModules": true,           // safer with tools like tsx/esbuild
+  
+      /* Strictness */
+      "strict": true,
+      "skipLibCheck": true,              // faster builds, safe in most projects
+      "noImplicitOverride": true,
+      "noUncheckedIndexedAccess": true,
+  
+      /* Debugging */
+      "sourceMap": true
+    },
+    "include": ["src"]
+  }
