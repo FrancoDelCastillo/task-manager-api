@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx src/server.ts",
+    "dev": "tsx --require ./src/preload.ts src/index.ts",
     "build": "node build.mjs",
     "start": "node dist/server.js"
   },
@@ -19,9 +19,11 @@
     "express": "^5.1.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.0",
     "esbuild": "^0.25.9",
+    "supabase": "^2.39.2",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }
