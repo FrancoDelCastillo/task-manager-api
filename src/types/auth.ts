@@ -8,6 +8,7 @@ export interface AuthenticatedRequest extends Request {
     email?: string;
   };
   supabase?: SupabaseClient;
+  supabaseAuth?: SupabaseClient;
 }
 
 // User type for authentication

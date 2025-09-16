@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Board } from "./types";
+import { Board, BoardInsert } from "./types";
 
 export const getBoardsByUser = async (supabase: SupabaseClient, userId: string): Promise<Board[]> => {
   const { data, error } = await supabase
@@ -13,7 +13,7 @@ export const getBoardsByUser = async (supabase: SupabaseClient, userId: string):
 
 export const createBoard = async (
   supabase: SupabaseClient,
-  board: Omit<Board, "id" | "created_at">
+  board: BoardInsert
 ): Promise<Board> => {
   try {
     const { data, error } = await supabase

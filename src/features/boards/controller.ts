@@ -23,13 +23,13 @@ export const createBoard = async (req: AuthenticatedRequest, res: Response) => {
   try {
     console.log('🎯 createBoard called');
     console.log('👤 req.user:', req.user);
-    console.log('🔑 req.supabase exists:', !!req.supabase);
+    console.log('🔑 req.supabase exists:', !!req.supabaseAuth);
     
     if (!req.user) {
       return res.status(401).json({ error: "User not authenticated" });
     }
 
-    if (!req.supabase) {
+    if (!req.supabaseAuth) {
       return res.status(500).json({ error: "Database client not available" });
     }
 
@@ -41,15 +41,17 @@ export const createBoard = async (req: AuthenticatedRequest, res: Response) => {
     console.log('📝 Creating board:', name, 'by user:', req.user.id);
     console.log('🔑 About to call repository with authenticated client...');
 
-    const newBoard = await boardRepo.createBoard(req.supabase, { 
+    const newBoard = await boardRepo.createBoard(req.supabaseAuth, { 
       name, 
-      description, 
-      created_by: req.user.id 
+      description
     });
+
+    
     
     console.log('✅ Board created successfully:', newBoard.id);
     res.status(201).json(newBoard);
   } catch (err: any) {
+    console.log('❌ newBoard:', err);
     console.log('❌ Error in createBoard:', err.message);
     res.status(500).json({ error: err.message });
   }

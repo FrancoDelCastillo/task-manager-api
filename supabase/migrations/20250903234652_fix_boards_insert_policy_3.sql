@@ -1,7 +1,3 @@
--- =========================================
--- FIX: Boards insert policy
--- =========================================
-
 drop policy if exists "boards_insert" on public.boards;
 
 create policy "boards_insert"
