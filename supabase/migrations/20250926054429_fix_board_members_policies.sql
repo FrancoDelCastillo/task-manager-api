@@ -1,0 +1,1 @@
+drop policy if exists board_members_select on public.board_members;

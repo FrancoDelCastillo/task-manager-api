@@ -4,94 +4,114 @@ import * as taskRepo from "./repository";
 
 export const getTasks = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    if (!req.supabase) {
-      return res.status(500).json({ error: "Database client not available" });
-    }
-
+    const userId = req.userId!;
     const { boardId } = req.params;
+    
     if (!boardId) {
-      return res.status(400).json({ error: "Missing boardId in params" });
+      return res.status(400).json({ 
+        error: "Missing boardId in params",
+        code: "MISSING_PARAMS"
+      });
     }
 
-    const tasks = await taskRepo.getTasksByBoard(req.supabase, boardId);
+    const tasks = await taskRepo.getTasksByBoard(boardId, userId);
     res.json(tasks);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    const statusCode = err.statusCode || 500;
+    const errorCode = err.code || 'INTERNAL_ERROR';
+    
+    res.status(statusCode).json({ 
+      error: err.message,
+      code: errorCode
+    });
   }
 };
 
 export const createTask = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    console.log('🎯 createTask called');
-    console.log('👤 req.user:', req.user);
-    console.log('🔑 req.supabase exists:', !!req.supabase);
+    const userId = req.userId!;
+    const { boardId } = req.params;
+
+    if (!boardId) {
+      return res.status(400).json({ error: "Missing boardId in params" });
+    }
+
+    const { title, description, status } = req.body ?? {};
+
+    const task = await taskRepo.createTask({ board_id: boardId, title, description, status, created_by: userId });
+
+    console.log("Task created")
+    return res.status(201).json(task);
+
+  } catch (e: any) {
+    const statusCode = e.statusCode || e.status || 500;
+    const errorCode = e.code || 'INTERNAL_ERROR';
     
-    if (!req.user) {
-      return res.status(401).json({ error: "User not authenticated" });
-    }
-
-    if (!req.supabase) {
-      return res.status(500).json({ error: "Database client not available" });
-    }
-
-    const { board_id, title } = req.body;
-    if (!board_id || !title) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    console.log('📝 Creating task for board:', board_id, 'by user:', req.user.id);
-    console.log('🔑 About to call repository with authenticated client...');
-
-    const { description = "", status = "todo" } = req.body;
-    const newTask = await taskRepo.createTask(req.supabase, {
-      board_id,
-      title,
-      description,
-      status,
-      created_by: req.user.id,
+    return res.status(statusCode).json({ 
+      error: e.message,
+      code: errorCode
     });
-    
-    console.log('✅ Task created successfully:', newTask.id);
-    res.status(201).json(newTask);
-  } catch (err: any) {
-    console.log('❌ Error in createTask:', err.message);
-    res.status(500).json({ error: err.message });
   }
 };
 
 export const updateTask = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    if (!req.supabase) {
-      return res.status(500).json({ error: "Database client not available" });
+    const userId = req.userId!;
+    const { taskId, boardId } = req.params;
+    if (!taskId) {
+      return res.status(400).json({ 
+        error: "Missing task id in params",
+        code: "MISSING_PARAMS"
+      });
     }
-
-    const { id } = req.params;
-    if (!id) {
-      return res.status(400).json({ error: "Missing task id in params" });
+    if (!boardId) {
+      return res.status(400).json({ 
+        error: "Missing board id in params",
+        code: "MISSING_PARAMS"
+      });
     }
 
     const updates = req.body;
-    const updated = await taskRepo.updateTask(req.supabase, id, updates);
+    const updated = await taskRepo.updateTask(taskId, userId, boardId, updates);
+    console.log("Task updated")
     res.json(updated);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    const statusCode = err.statusCode || 500;
+    const errorCode = err.code || 'INTERNAL_ERROR';
+    
+    res.status(statusCode).json({ 
+      error: err.message,
+      code: errorCode
+    });
   }
 };
 
 export const deleteTask = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    if (!req.supabase) {
-      return res.status(500).json({ error: "Database client not available" });
+    const userId = req.userId!;
+    const { taskId, boardId } = req.params;
+    if (!taskId) {
+      return res.status(400).json({ 
+        error: "Missing task id in params",
+        code: "MISSING_PARAMS"
+      });
+    }
+    if (!boardId) {
+      return res.status(400).json({ 
+        error: "Missing board id in params",
+        code: "MISSING_PARAMS"
+      });
     }
 
-    const { id } = req.params;
-    if (!id) {
-      return res.status(400).json({ error: "Missing task id in params" });
-    }
-
-    await taskRepo.deleteTask(req.supabase, id);
+    await taskRepo.deleteTask(taskId, userId, boardId);
     res.status(204).send();
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    const statusCode = err.statusCode || 500;
+    const errorCode = err.code || 'INTERNAL_ERROR';
+    
+    res.status(statusCode).json({ 
+      error: err.message,
+      code: errorCode
+    });
   }
 };

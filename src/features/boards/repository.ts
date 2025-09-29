@@ -1,43 +1,48 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import { supabaseSrv } from "../../db/supabase";
 import { Board, BoardInsert } from "./types";
 
-export const getBoardsByUser = async (supabase: SupabaseClient, userId: string): Promise<Board[]> => {
-  const { data, error } = await supabase
+export interface CreateBoardInput {
+  name: string;
+  description?: string;
+  created_by: string;
+}
+
+export const getBoardsByUser = async (userId: string): Promise<Board[]> => {
+  const { data, error } = await supabaseSrv
     .from("boards")
     .select("*")
     .eq("created_by", userId);
 
   if (error) throw new Error(error.message);
-  return data || [];
+  return data;
 };
 
 export const createBoard = async (
-  supabase: SupabaseClient,
-  board: BoardInsert
+  input: CreateBoardInput
 ): Promise<Board> => {
-  try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseSrv
       .from("boards")
-      .insert(board)
+      .insert(input)
       .select()
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      throw new Error(error.message);
+    }
     return data;
-  } catch (err) {
-    throw err;
-  }
 };
 
 export const updateBoard = async (
-  supabase: SupabaseClient,
+  userId: string,
   boardId: string,
   updates: Partial<Board>
 ): Promise<Board> => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseSrv
     .from("boards")
     .update(updates)
     .eq("id", boardId)
+    .eq("created_by", userId)
     .select()
     .single();
 
@@ -46,9 +51,9 @@ export const updateBoard = async (
 };
 
 export const deleteBoard = async (
-  supabase: SupabaseClient,
+  userId: string,
   boardId: string
 ): Promise<void> => {
-  const { error } = await supabase.from("boards").delete().eq("id", boardId);
+  const { error } = await supabaseSrv.from("boards").delete().eq("id", boardId).eq("created_by", userId);
   if (error) throw new Error(error.message);
 };

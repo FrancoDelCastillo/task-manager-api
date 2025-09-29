@@ -6,7 +6,6 @@ export const getEnv = (key: string): string => {
     return value;
 };
 
-
 export const getEnvNumber = (key: string): number => {
     const value = getEnv(key);
     const num = Number(value);

@@ -1,17 +1,23 @@
-import { Request } from "express";
-import { SupabaseClient } from "@supabase/supabase-js";
+import type { Request } from "express";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-// Extend the Express Request interface to include user property and authenticated supabase client
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email?: string;
   };
+
+  userId?: string;
+
+  accessToken?: string;
+
+  // RLS (anon + Authorization: Bearer <token>)
   supabase?: SupabaseClient;
+
+  // Alias legacy
   supabaseAuth?: SupabaseClient;
 }
 
-// User type for authentication
 export interface AuthUser {
   id: string;
   email?: string;

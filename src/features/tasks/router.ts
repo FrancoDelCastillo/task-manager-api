@@ -2,14 +2,13 @@ import {Router} from "express";
 import * as taskController from "./controller";
 import { authenticateUser } from "../../lib/auth";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
-// Apply authentication to all task routes
 router.use(authenticateUser);
 
-router.get("/board/:boardId", taskController.getTasks);
+router.get("/", taskController.getTasks);
 router.post("/", taskController.createTask);
-router.put("/:id", taskController.updateTask);
-router.delete("/:id", taskController.deleteTask);
+router.put("/:taskId", taskController.updateTask);
+router.delete("/:taskId", taskController.deleteTask);
 
 export default router;

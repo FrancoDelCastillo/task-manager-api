@@ -17,22 +17,22 @@ export const authenticateUser = async (
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     
-    // Create a Supabase client
     const url = getEnv("SUPABASE_URL");
     const serviceKey  = getEnv("SUPABASE_SERVICE_ROLE_KEY");
     const anonKey = getEnv("SUPABASE_ANON_KEY");
     
-    // 1. Validate the token with service role key
+    // Validate the token with service role key
     const serviceClient = createClient(url, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
 
     const { data: { user }, error } = await serviceClient.auth.getUser(token);
+
     if (error || !user) {
       return res.status(401).json({ error: "Invalid token" });
     }
     
-    // 2. Create an RLS-enabled client using anon key + user JWT
+    // Create an RLS-enabled client using anon key + user JWT
     const rlsClient = createClient(url, anonKey, {
       global: {
         headers: { Authorization: `Bearer ${token}` },
@@ -40,11 +40,15 @@ export const authenticateUser = async (
       auth: { persistSession: false, autoRefreshToken: false }
     });
     
-    // 3. Attach both user info and RLS-enabled client to the request
+    // Attach both user info and RLS-enabled client to the request
     req.user = {
       id: user.id,
       email: user.email
     };
+
+    req.userId = user.id;
+    req.accessToken = token; 
+    req.supabase = rlsClient;
     req.supabaseAuth = rlsClient;
 
     next();

@@ -1,0 +1,1 @@
+drop policy if exists "Users can delete their own avatar" on storage.objects;
