@@ -11,7 +11,7 @@ const app: Application = express();
 
 const allowedOrigins = [
     "http://localhost:5173",
-    "https://task-manager-web.vercel.app",
+    "https://task-manager-web-sigma.vercel.app"
   ];
   
   app.use(
