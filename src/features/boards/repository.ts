@@ -9,13 +9,22 @@ export interface CreateBoardInput {
 }
 
 export const getBoardsByUser = async (userId: string): Promise<Board[]> => {
-  const { data, error } = await supabaseSrv
-    .from("boards")
-    .select("*")
-    .eq("created_by", userId)
-    .order("created_at", { ascending: false });
+  const { data: memberBoards, error } = await supabaseSrv
+    .from("board_members")
+    .select("board_id")
+    .eq("user_id", userId);
 
   if (error) throw new Error(error.message);
+
+  const boardIds = memberBoards?.map((b) => b.board_id) ?? [];
+
+  const { data, error: boardsError } = await supabaseSrv
+    .from("boards")
+    .select("*")
+    .in("id", boardIds)
+    .order("created_at", { ascending: false });
+
+  if (boardsError) throw new Error(boardsError.message);
   return data;
 };
 
