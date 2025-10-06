@@ -48,7 +48,6 @@ export const updateBoard = async (req: AuthenticatedRequest, res: Response) => {
 
 export const deleteBoard = async (req: AuthenticatedRequest, res: Response) => {
   try {
-
     const userId = req.userId!;
     
     const { boardId } = req.params;
@@ -57,7 +56,7 @@ export const deleteBoard = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(400).json({ error: "Missing board id in params" });
     }
 
-    const deleted = await boardRepo.deleteBoard(userId, boardId);
+    await boardRepo.deleteBoard(userId, boardId);
     console.log("Board deleted")
     res.status(204).send();
   } catch (err: any) {

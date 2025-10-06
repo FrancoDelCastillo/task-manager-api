@@ -1,4 +1,3 @@
-import { supabase } from "../../db/supabase";
 import { supabaseSrv } from "../../db/supabase";
 
 export interface Profile {
@@ -22,7 +21,7 @@ export const getProfileById = async (
   try {
     const { data, error } = await supabaseSrv
       .from("profiles")
-      .select("id, first_name, last_name, avatar_url, created_at, updated_at")
+      .select("id, first_name, last_name, avatar_url, created_at, updated_at, email")
       .eq("id", profileId)
       .single();
 
@@ -67,41 +66,6 @@ export const updateProfile = async (
       message: "Failed to update profile",
       statusCode: 500,
       code: "UPDATE_PROFILE_ERROR"
-    };
-  }
-};
-
-export const uploadAvatar = async (
-  userId: string,
-  file: Buffer,
-  contentType: string
-): Promise<string> => {
-  try {
-    const filePath = `${userId}/avatar/avatar.png`;
-    
-    const { data, error } = await supabaseSrv.storage
-      .from("avatars")
-      .upload(filePath, file, { 
-        upsert: true,
-        contentType 
-      });
-
-    if (error) {
-      throw error;
-    }
-
-    // Get public URL
-    const { data: publicUrlData } = supabaseSrv.storage
-      .from("avatars")
-      .getPublicUrl(filePath);
-
-    return publicUrlData.publicUrl;
-  } catch (error: any) {
-    console.error("Error uploading avatar:", error);
-    throw {
-      message: "Failed to upload avatar",
-      statusCode: 500,
-      code: "UPLOAD_AVATAR_ERROR"
     };
   }
 };

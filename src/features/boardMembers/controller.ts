@@ -24,6 +24,29 @@ export async function getBoardMembers(req: AuthenticatedRequest, res: Response) 
   }
 }
 
+export async function getUserRoleInBoard(req: AuthenticatedRequest, res: Response) {
+  try {
+    const userId = req.userId!;
+    const boardId = req.params.boardId;
+
+    if (!boardId) {
+      return res.status(400).json({ error: "Missing board id" });
+    }
+    
+    const isMember = await boardMembersRepo.isBoardMember(boardId, userId);
+    if (!isMember) {
+      return res.status(403).json({ error: "Access denied: You are not a member of this board" });
+    }
+
+    const role = await boardMembersRepo.getUserRoleInBoard(boardId, userId);
+    console.log("get user role: ", role)
+    
+    return res.json(role);
+  } catch (e: any) {
+    return res.status(e.status || 500).json({ error: e.message });
+  }
+}
+
 export async function addBoardMember(req: AuthenticatedRequest, res: Response) {
   try {
     const requester = req.userId!;

@@ -1,20 +1,61 @@
 import { supabaseSrv } from "../../db/supabase";
 
-export interface BoardMember {
-  board_id: string;
-  user_id: string;
+export type BoardMemberWithProfile = {
+  id: string;
   role: "admin" | "member";
-  created_at: string;
-}
+  board_id: string;
+  profile: {
+    id: string;
+    email: string;
+    first_name: string | null;
+    last_name: string | null;
+  } | null;
+};
 
-export const getBoardMembers = async (boardId: string): Promise<BoardMember[]> => {
+export const getBoardMembers = async (boardId: string): Promise<BoardMemberWithProfile[]> => {
   const { data, error } = await supabaseSrv
     .from("board_members")
-    .select("*")
-    .eq("board_id", boardId)
+    .select(`
+      board_id,
+      role,
+      user_id,
+      profiles (
+        id,
+        email,
+        first_name,
+        last_name
+      )
+    `)
+    .eq("board_id", boardId);
 
   if (error) throw new Error(error.message);
-  return (data as BoardMember[]) ?? [];
+  return (
+    data?.map((m: any) => ({
+      id: m.user_id,            
+      role: m.role,
+      board_id: m.board_id,
+      profile: m.profiles ? {
+        id: m.profiles.id,
+        email: m.profiles.email,
+        first_name: m.profiles.first_name,
+        last_name: m.profiles.last_name,
+      } : null,
+    })) ?? []
+  );
+};
+
+export const getUserRoleInBoard = async (boardId: string, userId: string) : Promise<BoardMemberWithProfile["role"]> => {
+  const { data, error } = await supabaseSrv
+    .from("board_members")
+    .select("role")
+    .eq("board_id", boardId)
+    .eq("user_id", userId)
+    .single();
+    
+    console.log("getUserRoleInBoard data: ", data)
+    
+  if (error) throw new Error(error.message);
+  return data.role as BoardMemberWithProfile["role"];
 };
 
 export const isBoardMember = async (boardId: string, userId: string): Promise<boolean> => {
@@ -30,7 +71,7 @@ export const isBoardMember = async (boardId: string, userId: string): Promise<bo
   return !!data;
 };
 
-export const addBoardMember = async (boardId: string, new_member: string, role: BoardMember["role"] = "member"): Promise<void> => {
+export const addBoardMember = async (boardId: string, new_member: string, role: BoardMemberWithProfile["role"] = "member"): Promise<void> => {
   const { error } = await supabaseSrv
     .from("board_members")
     .insert({ board_id: boardId, user_id: new_member, role });
